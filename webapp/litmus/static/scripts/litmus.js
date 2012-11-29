@@ -137,4 +137,24 @@ function renderTable(data) {
     }).bind('sort', function () {
         applyErrorRanges();
     });
+
+    oTable.$('td').editable( '../update/', {
+        "callback": function( sValue, y ) {
+            console.log('value =' + sValue)
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+        "submitdata": function ( value, settings ) {
+            console.log("allBuilds: " + allBuilds);
+            console.log("value: " + value + ", settings: " + settings);
+            console.log("build: " + oTable.fnGetPosition( this )[0])
+            return {
+                "build": allBuilds[oTable.fnGetPosition( this )[0]],
+                "metric": hdrs[oTable.fnGetPosition( this )[1]].sTitle
+            };
+        },
+        "name": "value",
+        "height": "14px",
+        "width": "100%"
+    } );
 }

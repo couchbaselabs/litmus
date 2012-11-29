@@ -5,4 +5,5 @@ urlpatterns = patterns(
     url(r'dashboard/$', 'litmus.views.dashboard'),
     url(r'post/$', 'litmus.views.post'),
     url(r'get/$', 'litmus.views.get'),
+    url(r'comment/$', 'litmus.views.comment'),
 )

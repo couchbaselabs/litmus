@@ -36,7 +36,7 @@ def post(request):
         build = request.POST['build']
         metrics = request.POST.getlist('metric')
         values = request.POST.getlist('value')
-    except KeyError as e:
+    except KeyError, e:
         return HttpResponse(e, status=400)
 
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
@@ -76,3 +76,37 @@ def get(request):
         response.append(row)
 
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+@csrf_exempt
+@require_POST
+def comment(request):
+    """REST API to add comments for litmus results.
+
+    build -- build version (e.g., '2.0.0-1723-rel-enterprise')
+    metric -- metric name (e.g., 'Rebalance time, sec')
+    comment -- comment string (e.g, 'Regression for RC1')
+
+    It supports multivalued parameters.
+
+    Sample request:
+        curl -d "build=2.0.0-1723-rel-enterprise\
+                 &metric=Latency, ms&value=555\
+                 &metric=Query throughput&value=1746" \
+            -X POST http://localhost:8000/litmus/update/
+    """
+    print "commenting : ", request.POST
+    try:
+        build = request.POST['build']
+        metric = request.POST['metric']
+        comment = request.POST['comment']
+    except KeyError, e:
+        return HttpResponse(e, status=400)
+
+    objs = TestResults.objects.filter(build=build, metric=metric)
+    if not objs:
+        return HttpResponse("empty result set", status=400)
+
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    objs.update(comment=comment, timestamp=timestamp)
+
+    return HttpResponse(content='Success')
